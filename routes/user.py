@@ -4,24 +4,14 @@ from models.user import predictions
 from schemas.user import User
 from typing import List
 from lambda_in.inboke_lambda_docker import inboke_lambda_1
-import json
 
 user = APIRouter()  
 
-@user.get(
-    "/users", 
-    tags=["users"], 
-    response_model=List[User],
-    description="Get a list of all users",
-    )
-def get_predictions():
-    return conn.execute(predictions.select()).fetchall()
-
 @user.post(
-    "/",
-    tags=["users"], 
+    "/insert_customer",
+    tags=["Post Method"], 
     response_model=User, 
-    description="Create a new user"
+    description="To insert customer data"
     )
 def create_user(user: User): 
     new_user = {
@@ -35,22 +25,29 @@ def create_user(user: User):
     result = conn.execute(predictions.insert().values(new_user))
     return conn.execute(predictions.select().where(predictions.c.id == result.lastrowid)).first()
 
+@user.get(
+    "/customers", 
+    tags=["Get Methods"], 
+    response_model=List[User],
+    description="Show_all_customer",
+    )
+def get_predictions():
+    return conn.execute(predictions.select()).fetchall()
 
 @user.get(
-    "/users_by_id/{id}",
-    tags=["users"],
+    "/customer_by_id/{id}",
+    tags=["Get Methods"],
     response_model=User,
-    description="Get a single user by Id",
+    description="Get a single customer by Id",
 )
-
 def get_user_one(id: str):
     return conn.execute(predictions.select().where(predictions.c.id == id)).first() 
 
 @user.get(
-    "/send_by_id/{id}",
-    tags=["users"],
+    "/get_customer_by_id_to_inboke_lambda/{id}",
+    tags=["Get Methods"],
     response_model=User,
-    description="send a single user by Id",
+    description="get customer by id to inboke lambda",
 )
 def get_user(id: str):
     query = conn.execute(predictions.select().where(predictions.c.id == id)).first()
